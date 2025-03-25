@@ -45,6 +45,8 @@ public:
 	virtual void Activate(UQuartzClockHandle* ClockHandle);
 
 
+	void _QueueAudioBeforeLoopStart();
+
 protected:
 	UPROPERTY()
 	UQuartzClockHandle* _ClockHandle;
@@ -57,16 +59,10 @@ private:
 
 	// Quartz
 	UPROPERTY()
-	FOnQuartzCommandEventBP _OnLoopStartDelegate;
-	UFUNCTION()
-	void _OnLoopStartCallback(EQuartzCommandDelegateSubType EventType, FName Name);
-	UPROPERTY()
 	FOnQuartzCommandEventBP _OnAudioEventDelegate;
 	UFUNCTION()
 	void _OnAudioEventDelegateCallback(EQuartzCommandDelegateSubType EventType, FName Name);
 	
 	// Helpers
 	UAudioComponent* _GetAudioComponent();
-	void _QueueAudioBeforeLoopStart();
-	void _SubscribeToLoopStart();
 };

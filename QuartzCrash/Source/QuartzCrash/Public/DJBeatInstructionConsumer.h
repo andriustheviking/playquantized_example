@@ -22,6 +22,8 @@ class QUARTZCRASH_API UDJBeatInstructionConsumer : public USceneComponent
 	GENERATED_BODY()
 
 public:
+	UDJBeatInstructionConsumer();
+
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UQuartzClockHandle> BeatClockHandle;
 
@@ -31,4 +33,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ActivateInstructions();
 
+
+private:
+	UPROPERTY()
+	FOnQuartzCommandEventBP _OnLoopStartDelegate;
+	UFUNCTION()
+	void _OnLoopStartCallback(EQuartzCommandDelegateSubType EventType, FName Name);
+
+	void _SubscribeToLoopStart();
+	void _QueueInstructions();
 };

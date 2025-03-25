@@ -15,6 +15,11 @@
 */
 
 
+UDJBeatInstructionConsumer::UDJBeatInstructionConsumer()
+{
+	_OnLoopStartDelegate.BindDynamic(this, &UDJBeatInstructionConsumer::_OnLoopStartCallback);
+}
+
 void UDJBeatInstructionConsumer::ActivateInstructions()
 {
 	ensureMsgf(BeatClockHandle != nullptr, TEXT("UDJBeatInstructionConsumer::Add - Attempted to Add beat without BeatClockHandle"));
@@ -29,5 +34,45 @@ void UDJBeatInstructionConsumer::ActivateInstructions()
 		}
 
 		instruction->Activate(BeatClockHandle);
+	}
+
+	_SubscribeToLoopStart();
+}
+
+void UDJBeatInstructionConsumer::_OnLoopStartCallback(EQuartzCommandDelegateSubType EventType, FName Name)
+{
+	DJLog(Warning, "Percent=%f EventType=%s Name=%s", BeatClockHandle->GetBeatProgressPercent(EQuartzCommandQuantization::Bar), *UEnum::GetValueAsString(EventType), *Name.ToString());
+
+	switch (EventType)
+	{
+	case EQuartzCommandDelegateSubType::CommandOnQueued:
+		_QueueInstructions();
+		break;
+	case EQuartzCommandDelegateSubType::CommandOnStarted:
+		_SubscribeToLoopStart();
+		break;
+	case EQuartzCommandDelegateSubType::CommandOnFailedToQueue:
+		DJLog(Error, "_OnLoopStartCallback EventType=%s Name=%s", *UEnum::GetValueAsString(EventType), *Name.ToString());
+		break;
+	default:
+		break;
+	}
+}
+
+void UDJBeatInstructionConsumer::_SubscribeToLoopStart()
+{
+	FQuartzQuantizationBoundary quantBoundary;
+	quantBoundary.bFireOnClockStart = true;
+	quantBoundary.CountingReferencePoint = EQuarztQuantizationReference::BarRelative;
+	quantBoundary.Quantization = EQuartzCommandQuantization::Bar;
+
+	BeatClockHandle->NotifyOnQuantizationBoundary(this, quantBoundary, _OnLoopStartDelegate);
+}
+
+void UDJBeatInstructionConsumer::_QueueInstructions()
+{
+	for (auto instruction : BeatInstructions)
+	{
+		instruction->_QueueAudioBeforeLoopStart();
 	}
 }
