@@ -37,7 +37,7 @@ public:
 	TObjectPtr<USoundBase> Audio;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TArray<EQuartzCommandQuantization> Intervals;
+	EQuartzCommandQuantization Interval = EQuartzCommandQuantization::Beat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Multiplier = 1.f;
